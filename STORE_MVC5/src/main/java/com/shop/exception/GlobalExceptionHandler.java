@@ -2,8 +2,10 @@ package com.shop.exception;
 
 import java.util.Date;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,5 +62,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 
 	    return ResponseEntity.status(Integer.parseInt(bizStatusCode.getCode())).body(exceptionResponse);
 	}
+	
+	// HttpMediaTypeNotAcceptable Exception
+	@Override
+	public ResponseEntity<Object> handleHttpMediaTypeNotSupported(
+	        HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+	    ExceptionResponse exceptionResponse = new ExceptionResponse(
+	            new Date(),
+	            "허용되지 않은 미디어 타입입니다.",
+	            "허용된 미디어 타입: " + ex.getSupportedMediaTypes().toString());
+
+	    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(exceptionResponse);
+	}
+	
+	
+
+	//HttpStatus.UNSUPPORTED_MEDIA_TYPE
+//	@Override
+//	public ResponseEntity<Object> handleHttpMdeiatypeNotSupported{
+//		HttpMediaTypeNotSupportedException ex,
+//		HttpHeader headers,
+//		
+//	}
 
 }

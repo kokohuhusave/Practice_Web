@@ -17,4 +17,4 @@ public class ExceptionResponse {
         this.message = message;
         this.details = details;
     }
-}
+}	

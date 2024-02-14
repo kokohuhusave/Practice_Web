@@ -1,5 +1,6 @@
 package com.shop.controller;
 
+import org.springframework.http.MediaType;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,6 +51,12 @@ public class BizController {
 //    }
     @GetMapping("/custom-exception-test")
     public ResponseEntity<?> customExceptionTest() {
-        throw new CustomException("Test", BizStatusCode.SUCCESS); // BizStatusCode 사용
+        throw new CustomException("Test", BizStatusCode.BAD_REQUEST);
     }
+    
+    @PostMapping(value = "/test-media-type", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> testMediaType(@RequestBody String body) {
+        return ResponseEntity.ok("JSON body 전달 받음");
+    }
+
 }
