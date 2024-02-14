@@ -24,7 +24,12 @@ public class CustomException extends RuntimeException{
 		super(message);
 		this.bizStatusCode = bizStatusCode;
 	}
-
+	
+	public CustomException(BizStatusCode bizStatusCode) {
+        super(bizStatusCode.getMessage());
+        this.bizStatusCode = bizStatusCode;
+    }
+	
 	public BizStatusCode getBizStatusCode() {
 		return this.bizStatusCode;
 	}

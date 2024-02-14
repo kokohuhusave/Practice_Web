@@ -9,4 +9,5 @@ public interface StatusCode {
     Date getTimestamp();
     String getMessage();
     String getDetails();
+
 }

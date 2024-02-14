@@ -1,21 +1,28 @@
 package com.shop.exception;
 
 import java.util.Date;
+import java.util.Locale;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.shop.config.MessageService;
 import com.shop.enums.BizStatusCode;
 
+import lombok.RequiredArgsConstructor;
+
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
+	
+	private final MessageService messageService;
 	
 //    @ExceptionHandler(Exception.class) 
 //    public ResponseEntity<String> handleException(Exception e) {
@@ -52,15 +59,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 //	    return ResponseEntity.status(statusCode).body(exceptionResponse);
 //	}
 	@ExceptionHandler(CustomException.class)
-	public final ResponseEntity<Object> handleCustomException(CustomException ex, WebRequest request) {
+	public final ResponseEntity<?> handleCustomException(CustomException ex, WebRequest request) {
 	    BizStatusCode bizStatusCode = ex.getBizStatusCode();
-	    ExceptionResponse exceptionResponse = new ExceptionResponse(
-	            new Date(),
-	            bizStatusCode.getMessage(),
-	            request.getDescription(false));
-
-
-	    return ResponseEntity.status(Integer.parseInt(bizStatusCode.getCode())).body(exceptionResponse);
+	    String messageKey = bizStatusCode.getMessage();
+	    return ResponseEntity
+	    		.status(Integer.parseInt(bizStatusCode.getCode()))
+	    		.body(ExceptionResponse.builder()
+	    				.timestamp(new Date())
+	    				.message(messageService.getMessage(messageKey))
+	    				.details(request.getDescription(false))
+	    				);
 	}
 	
 	// HttpMediaTypeNotAcceptable Exception
@@ -77,13 +85,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 	}
 	
 	
-
-	//HttpStatus.UNSUPPORTED_MEDIA_TYPE
-//	@Override
-//	public ResponseEntity<Object> handleHttpMdeiatypeNotSupported{
-//		HttpMediaTypeNotSupportedException ex,
-//		HttpHeader headers,
-//		
-//	}
-
+//	
 }

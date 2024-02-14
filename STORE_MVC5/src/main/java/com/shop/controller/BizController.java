@@ -2,7 +2,9 @@ package com.shop.controller;
 
 import org.springframework.http.MediaType;
 import java.util.List;
+import java.util.Locale;
 
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.biz.ShopBizService;
@@ -26,7 +29,8 @@ import lombok.RequiredArgsConstructor;
 public class BizController {
 
     private final ShopBizService shopBizService;
-
+    private final MessageSource messageSource;
+    
     @PostMapping("/cart-items/{userId}/{itemId}")
     public ResponseEntity<String> addItemToUserCart(@PathVariable Long userId, @PathVariable Long itemId) {
         shopBizService.addItemToUserCart(userId, itemId);
@@ -58,5 +62,23 @@ public class BizController {
     public ResponseEntity<String> testMediaType(@RequestBody String body) {
         return ResponseEntity.ok("JSON body 전달 받음");
     }
+    
+//    @GetMapping("/greeting")
+//    public ResponseEntity<String> greeting(
+//    		
+//            @RequestParam(name = "name", defaultValue = "World") String name,
+//            Locale locale) {
+//        String welcomeMessage = messageSource.getMessage("welcome", new Object[]{name}, locale);
+//        return ResponseEntity.ok(welcomeMessage);
+//    }
+    @GetMapping("/greeting")
+    public ResponseEntity<String> greeting(@RequestParam(name = "name", defaultValue = "World") String name, Locale locale) {
+        if("error".equals(name)) {
+            throw new CustomException(BizStatusCode.BAD_REQUEST	);
+        }
+        String welcomeMessage = messageSource.getMessage("welcome", new Object[]{name}, locale);
+        return ResponseEntity.ok(welcomeMessage);
+    }
+
 
 }

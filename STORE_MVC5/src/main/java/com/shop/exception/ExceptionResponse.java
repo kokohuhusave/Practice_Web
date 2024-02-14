@@ -2,10 +2,12 @@ package com.shop.exception;
 
 import java.util.Date;
 
+import lombok.Builder;
 import lombok.Getter;
 
 
 @Getter
+@Builder
 public class ExceptionResponse {
     private Date timestamp;
     private String message;
