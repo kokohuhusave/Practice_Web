@@ -58,13 +58,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 //	            request.getDescription(false));
 //	    return ResponseEntity.status(statusCode).body(exceptionResponse);
 //	}
-	@ExceptionHandler(CustomException.class)
+	@ExceptionHandler(CustomException.class) // CustomException 발생할때 호출
 	public final ResponseEntity<?> handleCustomException(CustomException ex, WebRequest request) {
-	    BizStatusCode bizStatusCode = ex.getBizStatusCode();
-	    String messageKey = bizStatusCode.getMessage();
-	    return ResponseEntity
-	    		.status(Integer.parseInt(bizStatusCode.getCode()))
-	    		.body(ExceptionResponse.builder()
+	    BizStatusCode bizStatusCode = ex.getBizStatusCode(); // 예외에서 비즈니스 상태 코드를 객체로 가져음
+	    String messageKey = bizStatusCode.getMessage();  // 비즈니스 상태 코드 객체로부터 메시지 키를 추출
+	    return ResponseEntity // 여기 제네릭 적용 ?? 한번 알아볼것 body 다바꿔야 할수있음
+	    		.status(Integer.parseInt(bizStatusCode.getCode())) //HTTP상태코드 설정
+	    		.body(ExceptionResponse.builder()  // 빌더패턴 
 	    				.timestamp(new Date())
 	    				.message(messageService.getMessage(messageKey))
 	    				.details(request.getDescription(false))

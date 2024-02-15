@@ -1,6 +1,7 @@
 package com.shop.controller;
 
 import org.springframework.http.MediaType;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -20,7 +21,7 @@ import com.shop.biz.ShopBizService;
 import com.shop.entity.Item;
 import com.shop.enums.BizStatusCode;
 import com.shop.exception.CustomException;
-
+import com.shop.config.*;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -49,17 +50,17 @@ public class BizController {
         return ResponseEntity.ok(items);
     }
     
-//    @GetMapping("/custom-exception-test")
-//    public ResponseEntity<?> CustomException(){
-//    	throw new CustomException("Test", HttpStatus.BAD_GATEWAY);
-//    }
+
     @GetMapping("/custom-exception-test")
     public ResponseEntity<?> customExceptionTest() {
-        throw new CustomException("Test", BizStatusCode.BAD_REQUEST);
+        throw new CustomException("Test", BizStatusCode.SUCCESS);
     }
     
+    // test-media-type 경로로 들어오는 post요청을 처리하고 consumes 속성을 통해 JSON 형식의 데이터를
+    // 요청 본문으로만 받는다
     @PostMapping(value = "/test-media-type", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> testMediaType(@RequestBody String body) {
+    	// JSON 데이터를 String으로 받고 @RequestBody 통해 HTTP 요청 본문을 자바 객체로 변환
         return ResponseEntity.ok("JSON body 전달 받음");
     }
     
@@ -71,14 +72,21 @@ public class BizController {
 //        String welcomeMessage = messageSource.getMessage("welcome", new Object[]{name}, locale);
 //        return ResponseEntity.ok(welcomeMessage);
 //    }
-    @GetMapping("/greeting")
+    @GetMapping("/greeting") 
     public ResponseEntity<String> greeting(@RequestParam(name = "name", defaultValue = "World") String name, Locale locale) {
-        if("error".equals(name)) {
-            throw new CustomException(BizStatusCode.BAD_REQUEST	);
+    	// RequestParam에서 name값 추출 없다면 World 사용
+        if("error".equals(name)) { // 
+            throw new CustomException(BizStatusCode.BAD_REQUEST);
         }
         String welcomeMessage = messageSource.getMessage("welcome", new Object[]{name}, locale);
+        //locale에 맞게 welcome메세지 조회
         return ResponseEntity.ok(welcomeMessage);
     }
-
+    
+    @GetMapping("/apis/test")
+    public ResponseEntity<String> testApi(Locale locale) {
+        String testMessage = "This is a response from /api/shop/apis/test endpoint.<>)";
+        return ResponseEntity.ok(testMessage);
+    }
 
 }

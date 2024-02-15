@@ -6,8 +6,8 @@ import lombok.Getter;
 
 public interface StatusCode {
 	
-    Date getTimestamp();
-    String getMessage();
+    Date getTimestamp(); // 반환 함수
+    String getMessage(); 
     String getDetails();
 
 }

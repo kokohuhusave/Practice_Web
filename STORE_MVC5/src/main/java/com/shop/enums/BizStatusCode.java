@@ -17,11 +17,12 @@ public enum BizStatusCode implements StatusCode {
     SERVICE_UNAVAILABLE(new Date(), "503", "Service Unavailable", "The server is currently unable to handle the request due to a temporary overloading or maintenance of the server");
 	
 	
-    private final Date timestamp;
-    private final String code;
-    private final String message;
-    private final String details;
+    private final Date timestamp; // 상태 코드가 정의돈 시간을 나타낸다
+    private final String code; 	  // HTTP 응답 코드
+    private final String message;	// 메세지
+    private final String details;	// 상세 정보
 
+    // 각 상수에 대해 필요한 정보를 초기화
     BizStatusCode(Date timestamp, String code, String message, String details) {
         this.timestamp = timestamp;
         this.code = code;

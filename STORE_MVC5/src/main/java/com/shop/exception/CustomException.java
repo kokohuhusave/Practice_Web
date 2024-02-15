@@ -18,7 +18,7 @@ public class CustomException extends RuntimeException{
 //		return httpStatus.value();
 //	} 
 //	
-	private final BizStatusCode bizStatusCode;
+	private final BizStatusCode bizStatusCode; //
 	
 	public CustomException(String message, BizStatusCode bizStatusCode) {
 		super(message);
