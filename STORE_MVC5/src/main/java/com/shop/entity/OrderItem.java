@@ -8,12 +8,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OrderItem {
-    
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @ManyToOne
+    @JoinColumn(name = "order_id")
     private Order order;
 
     @ManyToOne
@@ -21,12 +21,4 @@ public class OrderItem {
     
     private int price;
     private int count;
-
-    public Order getOrder() {
-        return this.order;
-    }
-
-    public Item getItem() {
-        return this.item;
-    }
 }

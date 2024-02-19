@@ -25,8 +25,8 @@ public class CartServiceImplement implements CartService<Cart, Long> {
     public Cart update(Cart cart) {
         Cart existingCart = cartRepository.findById(cart.getId())
             .orElseThrow(() -> new RuntimeException("Cart가 없습니다."));
-        existingCart.setEmail(cart.getEmail());
-        existingCart.setAddress(cart.getAddress());
+        //existingCart.setEmail(cart.get//getEmail());
+        //existingCart.setAddress(cart.getAddress());
         return cartRepository.save(existingCart);
     }
 

@@ -3,18 +3,16 @@ package com.shop.entity;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
-
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "`order`")
+@Table(name = "orders") // 예약어 회피
 @Getter
 @Setter
 public class Order {
-    
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     private LocalDateTime orderDate;
@@ -24,14 +22,6 @@ public class Order {
     
     private String status;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> orderItems;
-
-    public Set<OrderItem> getOrderItems() {
-        return this.orderItems;
-    }
-
-    public User getUser() {
-        return this.user;
-    }
 }

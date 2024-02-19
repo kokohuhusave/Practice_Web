@@ -5,6 +5,7 @@ import org.springframework.http.MediaType;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +19,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop.biz.ShopBizService;
+import com.shop.entity.Cart;
 import com.shop.entity.Item;
 import com.shop.enums.BizStatusCode;
 import com.shop.exception.CustomException;
+import com.shop.shopservice.CartService;
+import com.shop.shopservice.ItemService;
 import com.shop.config.*;
 import lombok.RequiredArgsConstructor;
+import com.shop.shopservice.ItemService;
 
 @RestController
 @RequestMapping("/api/shop")
@@ -30,7 +35,11 @@ import lombok.RequiredArgsConstructor;
 public class BizController {
 
     private final ShopBizService shopBizService;
+    private final CartService cartService;
     private final MessageSource messageSource;
+    private final ItemService itemService;
+    
+   
     
     @PostMapping("/cart-items/{userId}/{itemId}")
     public ResponseEntity<String> addItemToUserCart(@PathVariable Long userId, @PathVariable Long itemId) {
@@ -53,7 +62,7 @@ public class BizController {
 
     @GetMapping("/custom-exception-test")
     public ResponseEntity<?> customExceptionTest() {
-        throw new CustomException("Test", BizStatusCode.SUCCESS);
+        throw new CustomException("Test", BizStatusCode.BAD_REQUEST);
     }
     
     // test-media-type 경로로 들어오는 post요청을 처리하고 consumes 속성을 통해 JSON 형식의 데이터를
@@ -83,10 +92,33 @@ public class BizController {
         return ResponseEntity.ok(welcomeMessage);
     }
     
-    @GetMapping("/apis/test")
-    public ResponseEntity<String> testApi(Locale locale) {
-        String testMessage = "This is a response from /api/shop/apis/test endpoint.<>)";
-        return ResponseEntity.ok(testMessage);
-    }
+//    
+//    @GetMapping("/apis/test")
+//    public ResponseEntity<String> testApi(Locale locale) {
+//        return ResponseEntity.ok(testMessage);
+//    } 
 
+    @GetMapping("/apis/items")
+    public ResponseEntity<List<Item>> getItems() {
+        List<Item> items = itemService.getAll(); 
+        return ResponseEntity.ok(items);
+    }
+    
+//    @GetMapping("/apis/tests")
+//    public ResponseEntity<String> testApi(Locale locale) {
+//        String testMessage = "This is a response from /api/shop/apis/test endpoint.<>)";
+//        return ResponseEntity.ok(testMessage);
+//    } 
+    
+    
+//    @GetMapping("/user/{userId}")
+//    public ResponseEntity<Cart> getCartByUserId(@PathVariable Long userId) {
+//        Cart cart = cartService.getCartByUserId(userId);
+//        if(cart != null) {
+//            return ResponseEntity.ok(cart);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+   
 }

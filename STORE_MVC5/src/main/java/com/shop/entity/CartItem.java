@@ -1,11 +1,6 @@
 package com.shop.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,9 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CartItem {
-    
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @ManyToOne
@@ -25,8 +19,4 @@ public class CartItem {
     private Item item;
     
     private int count;
-
-    public Item getItem() {
-        return this.item;
-    }
 }
