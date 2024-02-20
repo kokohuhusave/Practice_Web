@@ -1,4 +1,0 @@
-spring:
-  messages:
-    basename: message/messages
-    encoding: UTF-8
