@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Page</title>
+</head>
+<body>
+    <h1>View Data</h1>
+    <div id="data-container">Loading...</div>
+
+    <script>
+        // Fetch API를 사용하여 REST API 호출
+        fetch('http://localhost:8080/api/shop/apis/items') 
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('404');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                const container = document.getElementById('data-container');
+                container.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => console.error('Fetch error:', error));
+    </script>
+</body>
+</html>

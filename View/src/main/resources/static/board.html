@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판</title>
+    <link rel="stylesheet" href="/css/board.css">
+</head>
+<body>
+    
+<section class="notice">
+    <div class="page-title">
+        <div class="container">
+            <h3>아이템목록</h3>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="buttons-container">
+            <form action="" class="search-form">
+                <input type="search" id="search" placeholder="검색어를 입력해주세요." value="">
+                <button type="submit" class="btn btn-dark">검색</button>
+            </form>
+            <button id="createItemButton" class="btn btn-primary">글 작성</button>
+        </div>
+    </div>
+    
+    <!-- board list area -->
+    <div id="board-list">
+        <div class="container">
+            <table class="board-table">
+                <thead>
+                <tr>
+                    <th scope="col" class="th-id">id</th>
+                    <th scope="col" class="th-itemname">상품명</th>
+                    <th scope="col" class="th-price">가격</th>
+                    <th scope="col" class="th-status">판매상태</th>
+                    <th scope="col" class="th-stockNumber">재고수량</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+	<div id="editForm" style="display:none;">
+    <div>
+        <label for="editItemName">Name:</label>
+        <input type="text" id="editItemName" required minlength="2" maxlength="30" placeholder="Item Name" oninvalid="this.setCustomValidity('이름을 다시 입력하세요 (2자 이상)')" oninput="this.setCustomValidity('')">
+    </div>
+    <div>
+        <label for="editItemPrice">Price:</label>
+        <input type="number" id="editItemPrice" required min="0" placeholder="Price" oninvalid="this.setCustomValidity('가격은 0 이상입니다 ')" oninput="this.setCustomValidity('')">
+    </div>
+    <div>
+        <label for="editItemStatus">Status:</label>
+        <select id="editItemStatus">
+            <option value="SELL">SELL</option>
+            <option value="SOLD_OUT">SOLD OUT</option>
+        </select>
+    </div>
+    <div>
+        <label for="editItemStockNumber">Stock Number:</label>
+        <input type="number" id="editItemStockNumber" required min="0" placeholder="Stock Number" oninvalid="this.setCustomValidity('재고는 0이상입니다 ')" oninput="this.setCustomValidity('')">
+    </div>
+    <div>
+        <label for="editItemDescription">Description:</label>
+        <textarea id="editItemDescription"></textarea>
+    </div>
+    <button id="saveChanges" class="btn btn-primary">Save Changes</button>
+	</div>
+	
+	
+	
+	<div id="createItemForm" style="display:none;">
+    <div>
+        <label for="createItemName">Name:</label>
+        <input type="text" id="createItemName" required minlength="2" maxlength="30" placeholder="Item Name" oninvalid="this.setCustomValidity('이름을 다시 입력하세요 (2자 이상)')" oninput="this.setCustomValidity('')">
+    </div>
+    <div>
+        <label for="createItemPrice">Price:</label>
+        <input type="number" id="createItemPrice" required min="0" placeholder="Price" oninvalid="this.setCustomValidity('가격은 0 이상입니다 ')" oninput="this.setCustomValidity('')">
+    </div>
+    <div>
+        <label for="createItemStatus">Status:</label>
+        <select id="createItemStatus">
+            <option value="SELL">SELL</option>
+            <option value="SOLD_OUT">SOLD OUT</option>
+        </select>
+    </div>
+    <div>
+        <label for="createItemStockNumber">Stock Number:</label>
+        <input type="number" id="createItemStockNumber" required min="0" placeholder="Stock Number" oninvalid="this.setCustomValidity('재고는 0이상입니다 ')" oninput="this.setCustomValidity('')">
+    </div>
+    <div>
+        <label for="createItemDescription">Description:</label>
+        <textarea id="createItemDescription"></textarea>
+    </div>
+    <button id="createItemSubmit" class="btn btn-primary">Submit</button>
+</div>
+	
+    <!-- Modal Structure -->
+    <div class="modal-container" id="itemModal">
+        <div class="modal">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <div class="modal-header">
+                <h3>Item Details</h3>
+            </div>
+            <div class="modal-content">
+    			<p>Name: <span id="modalItemName"></span></p>
+    			<p>Price: <span id="modalItemPrice"></span></p>
+    			<p>Status: <span id="modalItemStatus"></span></p>
+    			<p>Stock Number: <span id="modalItemStockNumber"></span></p>
+    			<p>Description: <span id="modalItemDescription"></span></p> 
+    			
+				<button id="editItemButton" class="btn btn-secondary">수정</button>
+    			<button id="deleteItemButton" class="btn btn-danger">삭제</button>
+    			<button id="saveItemButton" class="btn btn-primary" style="display: none;">저장</button>
+    			
+			</div>
+        </div>
+    </div>
+</section>
+
+<script>
+
+	
+	
+    let currentItemID; // 현재 선택된 아이템 ID를 저장할 변수
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchItems();
+        setupModalCloseEvent();
+        setupDeleteItemEvent();
+    });
+
+    function fetchItems() {
+        fetch("http://localhost:8080/api/shop/apis/items")
+        .then(response => response.json())
+        .then(data => displayItems(data))
+        .catch(error => console.error('Fetch error:', error));
+    }
+
+    function displayItems(items) {
+        const tbody = document.querySelector("#board-list .board-table tbody");
+        tbody.innerHTML = ''; 
+        items.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${item.id}</td><td>${item.itemname}</td><td>${item.price}</td><td>${item.status}</td><td>${item.stockNumber}</td>`;
+            tr.addEventListener('click', () => openModalWithItemDetails(item));
+            tbody.appendChild(tr);
+        });
+    }
+
+    function openModalWithItemDetails(item) {
+        currentItemID = item.id; // 현재 선택된 아이템 ID를 설정
+        document.getElementById('modalItemName').textContent = item.itemname;
+        document.getElementById('modalItemPrice').textContent = item.price;
+        document.getElementById('modalItemStatus').textContent = item.status; // Status 설정
+        document.getElementById('modalItemStockNumber').textContent = item.stockNumber; // Stock Number 설정
+        document.getElementById('modalItemDescription').textContent = item.description || "No description provided."; // Description 설정
+        document.getElementById('itemModal').style.display = 'block';
+    }
+
+    function setupModalCloseEvent() {
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('itemModal').style.display = 'none';
+        });
+    }
+
+    function setupDeleteItemEvent() {
+        document.getElementById('deleteItemButton').addEventListener('click', function() {
+            if (!currentItemID) {
+                alert('No item selected');
+                return;
+            }
+            fetch(`http://localhost:8080/api/shop/items/${currentItemID}`, {
+                method: 'DELETE',
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Deletion failed');
+                console.log('Item deleted successfully');
+                document.getElementById('itemModal').style.display = 'none';
+                fetchItems(); // 목록을 다시 불러옵니다.
+            })
+            .catch(error => console.error('Error:', error));
+            error.response && console.error('Error Response:', error.response);
+            if (error.response) {
+                console.error('Response status:', error.response.status);
+                console.error('Response body:', error.response.body);
+            }
+        });
+        
+        document.getElementById('editItemButton').addEventListener('click', function() {
+            // "수정" 버튼 클릭 시 실행되는 로직
+            // 모달에서 세부 정보를 입력 필드로 전환
+            document.getElementById('modalItemName').style.display = 'none';
+            document.getElementById('modalItemPrice').style.display = 'none';
+            document.getElementById('modalItemStatus').style.display = 'none';
+            document.getElementById('modalItemStockNumber').style.display = 'none';
+            document.getElementById('modalItemDescription').style.display = 'none';
+            
+            // 세부 정보를 수정 폼에 미리 채움
+            document.getElementById('editItemName').value = document.getElementById('modalItemName').textContent;
+            document.getElementById('editItemPrice').value = document.getElementById('modalItemPrice').textContent;
+            document.getElementById('editItemStatus').value = document.getElementById('modalItemStatus').textContent;
+            document.getElementById('editItemStockNumber').value = document.getElementById('modalItemStockNumber').textContent;
+            document.getElementById('editItemDescription').value = document.getElementById('modalItemDescription').textContent;
+            
+            // 수정 폼을 표시
+            document.getElementById('editForm').style.display = 'block';
+            document.getElementById('editItemButton').style.display = 'none'; // 수정 버튼 숨김
+            document.getElementById('saveChanges').style.display = 'inline-block'; // 저장 버튼 표시
+        });
+  		
+        document.getElementById('saveChanges').addEventListener('click', function() {
+            // "저장" 버튼 클릭 시 실행되는 로직
+        	const editItemName = document.getElementById('editItemName');
+    			if (!editItemName.checkValidity()) {
+        			alert('이름을 다시 입력하세요 (2자 이상)');
+        			return;
+    			}
+    			
+    		const editItemPrice = document.getElementById('editItemPrice');
+    		    if (!editItemPrice.checkValidity()) {
+    		        alert('가격은 0 이상입니다');
+    		        return;
+    		    }
+    		    
+    		const createItemStockNumber = document.getElementById('editItemStockNumber');
+    		    if (!editItemStockNumber.checkValidity()) {
+    		        alert('재고 수량을 입력하세요 (0 이상)');
+    		        return;
+    		    } 
+    		    
+            const updatedItem = {
+                itemname: document.getElementById('editItemName').value,
+                price: document.getElementById('editItemPrice').value,
+                status: document.getElementById('editItemStatus').value,
+                stockNumber: document.getElementById('editItemStockNumber').value,
+                description: document.getElementById('editItemDescription').value,
+            };
+
+            fetch(`http://localhost:8080/api/shop/items/${currentItemID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedItem),
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to update item');
+                return response.json();
+            })
+            .then(data => {
+                console.log('Item updated successfully', data);
+                document.getElementById('itemModal').style.display = 'none'; // 모달 닫기
+                fetchItems(); // 아이템 목록 새로고침
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+            	document.getEle,emtById('editForm').style.display = 'none';
+            	document.getElementById('itemModal').style.display = 'none';
+            });
+            
+        });
+        document.getElementById('createItemButton').addEventListener('click', function() {
+            // 글 작성 폼 표시
+            document.getElementById('createItemForm').style.display = 'block';
+        });
+
+        document.getElementById('createItemSubmit').addEventListener('click', function() {
+        	
+        	const editItemName = document.getElementById('createItemName');
+				if (!createItemName.checkValidity()) {
+    				alert('이름을 다시 입력하세요 (2자 이상)');
+    			return;
+			}
+			
+			const editItemPrice = document.getElementById('createItemPrice');
+		    	if (!createItemPrice.checkValidity()) {
+		        	alert('가격은 0 이상입니다');
+		        return;
+		    }
+		    
+			const createItemStockNumber = document.getElementById('createItemStockNumber');
+		    	if (!createItemStockNumber.checkValidity()) {
+		        	alert('재고 수량을 입력하세요 (0 이상)');
+		        return;
+		    } 
+        	
+            const newItem = {
+                itemname: document.getElementById('createItemName').value,
+                price: document.getElementById('createItemPrice').value,
+                status: document.getElementById('createItemStatus').value,
+                stockNumber: document.getElementById('createItemStockNumber').value,
+                description: document.getElementById('createItemDescription').value,
+            };
+
+            fetch('http://localhost:8080/api/shop/items', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newItem),
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to create item');
+                return response.json();
+            })
+            .then(data => {
+                console.log('Item created successfully', data);
+                document.getElementById('createItemForm').style.display = 'none'; // 폼 숨기기
+                fetchItems(); // 아이템 목록 새로고침
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+    }
+</script>
+</body>
+</html>
