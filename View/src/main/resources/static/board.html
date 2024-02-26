@@ -6,23 +6,27 @@
     <link rel="stylesheet" href="/css/board.css">
 </head>
 <body>
-    
+    <div class="language-switcher">
+    	<button onclick="switchLanguage('en')">EN</button>
+    	<button onclick="switchLanguage('ko')">KO</button>
+	</div>
 <section class="notice">
     <div class="page-title">
         <div class="container">
-            <h3>아이템목록</h3>
+            <h3 data-message-key="itemListing">아이템목록</h3>
         </div>
     </div>
 
     <div class="container">
         <div class="buttons-container">
             <form action="" class="search-form">
-                <input type="search" id="search" placeholder="검색어를 입력해주세요." value="">
-                <button type="submit" class="btn btn-dark">검색</button>
+                <input type="search" id="search" placeholder="검색어를 입력해주세요." value="" data-message-key="searchPlaceholder">
+                <button type="submit" class="btn btn-dark" data-message-key="searchButton">검색</button>
             </form>
-            <button id="createItemButton" class="btn btn-primary">글 작성</button>
+            <button id="createItemButton" class="btn btn-primary" data-message-key="createItemButton">글 작성</button>
         </div>
     </div>
+    
     
     <!-- board list area -->
     <div id="board-list">
@@ -31,10 +35,10 @@
                 <thead>
                 <tr>
                     <th scope="col" class="th-id">id</th>
-                    <th scope="col" class="th-itemname">상품명</th>
-                    <th scope="col" class="th-price">가격</th>
-                    <th scope="col" class="th-status">판매상태</th>
-                    <th scope="col" class="th-stockNumber">재고수량</th>
+                    <th scope="col" class="th-itemname" data-message-key="tableHeaderItemName">상품명</th>
+					<th scope="col" class="th-price" data-message-key="tableHeaderPrice">가격</th>
+					<th scope="col" class="th-status" data-message-key="tableHeaderStatus">판매상태</th>
+					<th scope="col" class="th-stockNumber" data-message-key="tableHeaderStockNumber">재고수량</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -124,12 +128,87 @@
 </section>
 
 <script>
+function switchLanguage(language) {
+    
+    let url = new URL(window.location.href);
+    url.searchParams.set('lang', language); // 새 언어 설정 추가
+    window.location.href = url.href;
+}
 
-	
+function setLanguageBasedMessages() {
+    const queryParams = new URLSearchParams(window.location.search);
+    const lang = queryParams.get('lang'); // URL에서 언어 설정 추출
+
+    const messages = {
+        en: {
+        	itemListing: "Item List",
+        	createItemButton: "Create Item",
+        	searchPlaceholder: "Please enter a keyword.",
+            tableHeaderId: "ID",
+            tableHeaderItemName: "Item Name",
+            tableHeaderPrice: "Price",
+            tableHeaderStatus: "Status",
+            tableHeaderStockNumber: "Stock Number",
+            searchButton: "Search",
+            
+            itemNameRequired: 'Please re-enter the name (at least 2 characters)',
+            itemPriceRequired: 'Price must be 0 or more',
+            itemStockNumberRequired: 'Please enter a stock number (0 or more)',
+            noItemSelected: 'No item selected',
+            deletionFailed: 'Deletion failed',
+            updateFailed: 'Failed to update item',
+            creationFailed: 'Failed to create item',
+        },
+        ko: {
+        	itemListing: "아이템 목록",
+        	createItemButton: "글 작성",
+        	searchButton: "검색",
+            searchPlaceholder: "검색어를 입력해주세요.",
+            tableHeaderId: "아이디",
+            tableHeaderItemName: "상품명",
+            tableHeaderPrice: "가격",
+            tableHeaderStatus: "판매상태",
+            tableHeaderStockNumber: "재고수량",
+            
+            itemNameRequired: '이름을 다시 입력해주세요 (2글자 이상)',
+            itemPriceRequired: '가격은 0 이상이어야 합니다',
+            itemStockNumberRequired: '재고 수량을 입력해주세요 (0 이상)',
+            noItemSelected: '선택된 항목이 없습니다',
+            deletionFailed: '삭제에 실패했습니다',
+            updateFailed: '항목 업데이트에 실패했습니다',
+            creationFailed: '항목 생성에 실패했습니다',
+        }
+    };
+
+    // 기본 언어는 영어, 없으면 영어 메시지 사용s
+
+    const currentMessages = messages[lang] || messages['ko'];
+
+    // 입력 유효성 검사 메시지 설정
+    document.querySelectorAll("[data-message-key]").forEach(el => {
+    const messageKey = el.dataset.messageKey;
+    	if (messageKey && currentMessages[messageKey]) {
+        	if (el.tagName === "INPUT" && el.placeholder !== undefined) {
+            	el.placeholder = currentMessages[messageKey]; // 입력 필드의 플레이스홀더 업데이트
+        	} else {
+            	el.textContent = currentMessages[messageKey]; // 버튼 포함 다른 요소의 텍스트 컨텐츠 업데이트
+        	}
+    	}
+	});
+
+
+
+    // 글로벌 메시지 객체에 현재 언어의 메시지 저장
+    window.appMessages = currentMessages;
+}
+
 	
     let currentItemID; // 현재 선택된 아이템 ID를 저장할 변수
 
+    
+    
     document.addEventListener('DOMContentLoaded', () => {
+    	setLanguageBasedMessages();
         fetchItems();
         setupModalCloseEvent();
         setupDeleteItemEvent();
@@ -154,12 +233,12 @@
     }
 
     function openModalWithItemDetails(item) {
-        currentItemID = item.id; // 현재 선택된 아이템 ID를 설정
+        currentItemID = item.id;
         document.getElementById('modalItemName').textContent = item.itemname;
         document.getElementById('modalItemPrice').textContent = item.price;
-        document.getElementById('modalItemStatus').textContent = item.status; // Status 설정
-        document.getElementById('modalItemStockNumber').textContent = item.stockNumber; // Stock Number 설정
-        document.getElementById('modalItemDescription').textContent = item.description || "No description provided."; // Description 설정
+        document.getElementById('modalItemStatus').textContent = item.status;
+        document.getElementById('modalItemStockNumber').textContent = item.stockNumber;
+        document.getElementById('modalItemDescription').textContent = item.description || "No description provided.";
         document.getElementById('itemModal').style.display = 'block';
     }
 
@@ -172,24 +251,19 @@
     function setupDeleteItemEvent() {
         document.getElementById('deleteItemButton').addEventListener('click', function() {
             if (!currentItemID) {
-                alert('No item selected');
+                alert(window.appMessages.noItemSelected);
                 return;
             }
             fetch(`http://localhost:8080/api/shop/items/${currentItemID}`, {
                 method: 'DELETE',
             })
             .then(response => {
-                if (!response.ok) throw new Error('Deletion failed');
+                if (!response.ok) throw new Error(window.appMessages.deletionFailed);
                 console.log('Item deleted successfully');
                 document.getElementById('itemModal').style.display = 'none';
-                fetchItems(); // 목록을 다시 불러옵니다.
+                fetchItems(); // Refresh the list
             })
             .catch(error => console.error('Error:', error));
-            error.response && console.error('Error Response:', error.response);
-            if (error.response) {
-                console.error('Response status:', error.response.status);
-                console.error('Response body:', error.response.body);
-            }
         });
         
         document.getElementById('editItemButton').addEventListener('click', function() {
@@ -218,19 +292,19 @@
             // "저장" 버튼 클릭 시 실행되는 로직
         	const editItemName = document.getElementById('editItemName');
     			if (!editItemName.checkValidity()) {
-        			alert('이름을 다시 입력하세요 (2자 이상)');
+        			alert(window.appMessages.itemNameRequired);
         			return;
     			}
     			
     		const editItemPrice = document.getElementById('editItemPrice');
     		    if (!editItemPrice.checkValidity()) {
-    		        alert('가격은 0 이상입니다');
+    		        alert(window.appMessages.itemPriceRequired);
     		        return;
     		    }
     		    
     		const createItemStockNumber = document.getElementById('editItemStockNumber');
     		    if (!editItemStockNumber.checkValidity()) {
-    		        alert('재고 수량을 입력하세요 (0 이상)');
+    		        alert(window.appMessages.itemStockNumberRequired);
     		        return;
     		    } 
     		    
@@ -276,19 +350,19 @@
         	
         	const editItemName = document.getElementById('createItemName');
 				if (!createItemName.checkValidity()) {
-    				alert('이름을 다시 입력하세요 (2자 이상)');
+					alert(window.appMessages.itemNameRequired);
     			return;
 			}
 			
 			const editItemPrice = document.getElementById('createItemPrice');
 		    	if (!createItemPrice.checkValidity()) {
-		        	alert('가격은 0 이상입니다');
+		    		alert(window.appMessages.itemPriceRequired);
 		        return;
 		    }
 		    
 			const createItemStockNumber = document.getElementById('createItemStockNumber');
 		    	if (!createItemStockNumber.checkValidity()) {
-		        	alert('재고 수량을 입력하세요 (0 이상)');
+		    		alert(window.appMessages.itemStockNumberRequired);
 		        return;
 		    } 
         	
